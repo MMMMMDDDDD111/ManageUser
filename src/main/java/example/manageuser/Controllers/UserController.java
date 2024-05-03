@@ -30,12 +30,12 @@ public class UserController {
         String html = "";
         html += "<ul>";
         html += " <li><a href='/testInsert'>Test Insert</a></li>";
-        html += " <li><a href='/showAllEmployee'>Show All Employee</a></li>";
+        html += " <li><a href='/showAllEmployee'>Show All Users</a></li>";
         html += " <li><a href='/showFullName'>Show All </a></li>";
-        html += " <li><a href='/findUserName'>Show User Name</a></li>";
-        html += " <li><a href='/deleteAllEmployee'>Delete All Employee</a></li>";
+        html += " <li><a href='/findUserName'>Show Users Name</a></li>";
+        html += " <li><a href='/deleteAllEmployee'>Delete All Users</a></li>";
         html += " <li><a href='/deleteByID'>Delete ID</a></li>";
-
+        html += " <li><a href='/usersByFullName'>Show Full Name Users</a></li>";
 
         html += "</ul>";
         return html;
@@ -103,6 +103,10 @@ public class UserController {
         return html.toString();
     }
 
+    @GetMapping("/usersByFullName")
+    public List<User> getUsersByFullName(@RequestParam String fullName) {
+        return userrepository.findCustomByFullName(fullName);
+    }
 
     @ResponseBody
     @RequestMapping("/deleteAllEmployee")

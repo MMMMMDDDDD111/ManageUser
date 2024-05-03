@@ -7,6 +7,9 @@ import java.util.List;
 
 @Document(collection = "PositionDB")
 public class Position {
+    @Id
+    private long id;
+
     private String positionName;
     private List<User> userList;
 
@@ -14,6 +17,9 @@ public class Position {
         this.positionName = positionName;
         this.userList = userList;
     }
+
+    public long getId() {return id;}
+    public void setId(long id) {this.id = id;}
 
     public String getPositionName() {
         return positionName;
