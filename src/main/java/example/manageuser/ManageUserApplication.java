@@ -4,6 +4,7 @@ import com.mongodb.client.MongoClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
@@ -17,6 +18,7 @@ public class ManageUserApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ManageUserApplication.class, args);
+        System.out.println("Hello World!");
     }
 
     @Bean

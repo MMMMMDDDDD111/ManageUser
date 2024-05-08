@@ -1,99 +1,132 @@
 package example.manageuser.Controllers;
-
+import example.manageuser.Entities.Position;
 import example.manageuser.Entities.User;
+import example.manageuser.Repositories.PositionRepository;
 import example.manageuser.Repositories.UserRepository;
-import example.manageuser.Repositories.UserRepositoryCustom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
+@RestController
+@RequestMapping("/api/user")
 public class UserController {
-    private static final String[] NAMES = { "Tom", "Jerry", "Donald" };
 
-    @Autowired
-    private UserRepositoryCustom userRepositoryCustom;
+    private static final Logger logger = LoggerFactory.getLogger(User.class);
+
+    private final UserRepository userRepository;
+    private final PositionRepository positionRepository;
 
     @Autowired
     private UserRepository userrepository;
 
+    public UserController(UserRepository userRepository, PositionRepository positionRepository) {
+        this.userRepository = userRepository;
+        this.positionRepository = positionRepository;
+    }
 
-    @ResponseBody
-    @RequestMapping("/")
-    public String home() {
-        String html = "";
-        html += "<ul>";
-        html += " <li><a href='/testInsert'>Test Insert</a></li>";
-        html += " <li><a href='/showAllEmployee'>Show All Users</a></li>";
-        html += " <li><a href='/showFullName'>Show All </a></li>";
-        html += " <li><a href='/findUserName'>Show Users Name</a></li>";
-        html += " <li><a href='/deleteAllEmployee'>Delete All Users</a></li>";
-        html += " <li><a href='/deleteByID'>Delete ID</a></li>";
-        html += " <li><a href='/usersByFullName'>Show Full Name Users</a></li>";
+    @PostMapping("/addUser")
+    public ResponseEntity<User> addUser(@Validated @RequestBody User user) {
+        try {
+            logger.info("Received addUser request with user: {}", user);
 
-        html += "</ul>";
-        return html;
+            Position position = user.getPosition();
+
+            if (position != null && position.getId() != 0L) {
+                Optional<Position> existingPosition = positionRepository.findById(position.getId());
+
+                if (existingPosition.isPresent()) {
+                    position = existingPosition.get();
+                } else {
+                    logger.error("Position with id {} not found", position.getId());
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
+            }
+            user.setPosition(position);
+            User savedUser = userRepository.save(user);
+            logger.info("User saved successfully: {}", savedUser);
+            return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error("Error occurred while adding user: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/updateUser/{id}")
+    public ResponseEntity<User> updateUserById(@PathVariable("id") Long id, @RequestBody User user) {
+        try {
+            logger.info("Received updateUser request with id: {} and user: {}", id, user);
+
+            Optional<User> userOptional = userRepository.findById(id);
+            if (!userOptional.isPresent()) {
+                logger.error("User with id {} not found", id);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            User existingUser = userOptional.get();
+            existingUser.setFullName(user.getFullName());
+            Date hireDate = user.getHireDate();
+            if (hireDate != null) {
+                existingUser.setHireDate(hireDate);
+            }
+            Position userPosition = user.getPosition();
+            if (userPosition != null) {
+                Optional<Position> existingPosition = positionRepository.findByIdOrPositionName(userPosition.getId(), userPosition.getPositionName());
+                if (existingPosition.isPresent()) {
+                    existingUser.setPosition(existingPosition.get());
+                } else {
+                    logger.error("Position with id {} or name {} not found", userPosition.getId(), userPosition.getPositionName());
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
+            }
+            User updatedUser = userRepository.save(existingUser);
+            logger.info("User updated successfully: {}", updatedUser);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error occurred while updating user: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @ResponseBody
-    @RequestMapping("/testInsert")
-    public String testInsert() {
-        User employee = new User();
-
-        long id = this.userRepositoryCustom.getMaxUserId() + 1;
-        int idx = (int) (id % NAMES.length);
-        String fullName = NAMES[idx] + " " + id;
-
-        employee.setId(id);
-        employee.setUserNo("E" + id);
-        employee.setFullName(fullName);
-        employee.setHireDate(new Date());
-        this.userrepository.insert(employee);
-
-        return "Inserted: " + employee;
-    }
-
-    @ResponseBody
-    @RequestMapping("/showAllEmployee")
-    public String showAllEmployee() {
+    @GetMapping("/showAllUsers")
+    public String showAllUsers() {
 
         List<User> users = this.userrepository.findAll();
 
-        StringBuilder html = new StringBuilder();
-        for (User user : users) {
-            html.append(user).append("<br>");
+        return users.toString();
+    }
+
+    @GetMapping("/findUserNo/{userNo}")
+    public ResponseEntity<User> findUserByUserNo(@PathVariable("userNo") String userNo) {
+        User user = userrepository.findByUserNo(userNo);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
         }
-
-        return html.toString();
+        return ResponseEntity.ok(user);
     }
 
-    @RequestMapping("/findUserNo")
-    public User findByUserNo(@RequestParam String userNo) {
-        return userrepository.findByUserNo(userNo);
-    }
-
-    @GetMapping("/findHireDate")
-    public String findHireDate(@RequestParam Date hireDate) {
-        List<User> users = userrepository.findByHireDateGreaterThan(hireDate);
-
-        StringBuilder html = new StringBuilder();
-        for (User user : users) {
-            html.append(user).append("<br>");
-        }
-
-        return html.toString();
-    }
     @ResponseBody
-    @RequestMapping("/showFullNameLikeTom")
-    public String showFullNameLikeTom() {
+    @GetMapping("/showUsersHiredAfter/{hireDate}")
+    public String showUsersHiredAfter(@PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") Date hireDate) {
+        List<User> users = this.userRepository.findByHireDateGreaterThan(hireDate);
+        return users.toString();
+    }
 
-        List<User> users = this.userrepository.findByFullNameLike("Tom");
+    @ResponseBody
+    @RequestMapping("/showFullNameLike")
+    public String showFullNameLike(@RequestParam("fullName") String fullName) {
+        logger.info("Received request to find users with full name like: {}", fullName);
+
+        List<User> users = this.userrepository.findByFullNameLike("%" + fullName + "%");
 
         StringBuilder html = new StringBuilder();
         for (User usr : users) {
@@ -103,28 +136,24 @@ public class UserController {
         return html.toString();
     }
 
-    @GetMapping("/usersByFullName")
-    public List<User> getUsersByFullName(@RequestParam String fullName) {
-        return userrepository.findCustomByFullName(fullName);
-    }
-
     @ResponseBody
-    @RequestMapping("/deleteAllEmployee")
-    public String deleteAllEmployee() {
-
+    @RequestMapping("/deleteAllUser")
+    public String deleteAllUsers() {
         this.userrepository.deleteAll();
-        return "Deleted!";
+        return "Delete All Successfully";
     }
 
-    @ResponseBody
-    @GetMapping("/deleteByID")
-    public String removeByIdAndReturnHtml() {
-        Long id = 1L;
-        this.userrepository.removeById(id);
-        return id +"Deleted User!";
+    @DeleteMapping("/deleteByID/{id}")
+    public ResponseEntity<String> removeById(@PathVariable Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
+        if (userOptional.isPresent()) {
+            User deletedUser = userOptional.get();
+            userRepository.deleteById(id);
+            return ResponseEntity.ok("Deleted User: " + deletedUser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
-
-
 }
 
 

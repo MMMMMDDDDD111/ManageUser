@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:c="">
+<head>
+    <title>DEmo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <style>
+        .w3-top {
+            position: fixed;
+            width: 100%;
+            top: 0;
+        }
+        .w3-bar {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.83);
+            color: #FFFFFFFF;
+            padding: 15px 0;
+        }
+        .w3-bar-item {
+            padding: 15px;
+            text-decoration: none;
+        }
+        .w3-hide-medium, .w3-hide-large {
+            display: none;
+        }
+        @media only screen and (max-width: 768px) {
+            .w3-hide-medium {
+                display: block;
+            }
+            .w3-bar-item, .w3-right {
+                display: none;
+            }
+        }
+        @media only screen and (max-width: 600px) {
+            .w3-hide-small {
+                display: none;
+            }
+            .w3-bar-item, .w3-right {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="w3-top">
+    <div class="w3-bar w3-black w3-card">
+        <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+        <a href="/templates/addUser.html" class="w3-bar-item w3-button w3-padding-large">Add</a>
+        <a href="/api/user/deleteAllUser" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Delete All Users</a>
+        <a href="/api/user/deleteByID//" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Delete ID</a>
+        <a href="/api/user/findUserNo//" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Show User No</a>
+        <a href="/api/user/showFullNameLike" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Position of Users</a>
+        <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
+    </div>
+</div>
+
+<div id="userList">
+    <h2>User List</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>User Number</th>
+            <th>Full Name</th>
+            <th>Hire Date</th>
+            <th>Position Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Loop through user data and create table rows -->
+        <c:forEach items="${users}" var="user">
+            <tr>
+                <td>${user.userNo}</td>
+                <td>${user.fullName}</td>
+                <td>${user.hireDate}</td>
+                <td>${user.positionName}</td>
+            </tr>
+        </c:forEach>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function myFunction() {
+        var x = document.getElementById("myLinks");
+        if (x.style.display === "block") {
+            x.style.display = "none";
+        } else {
+            x.style.display = "block";
+        }
+    }
+    function addUser() {
+        var user = {
+            fullName: "John Doe",
+        };
+
+        fetch('/api/user/addUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(user)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('User added successfully:', data);
+            })
+            .catch(error => {
+                console.error('There was a problem adding the user:', error);
+            });
+    }
+</script>
+
+<script>
+    function submitForm() {
+        document.getElementById("addUserForm").submit();
+        window.location.href = "/index.html";
+
+    }
+</script>
+</body>
+</html>

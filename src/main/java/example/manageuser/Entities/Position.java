@@ -2,23 +2,26 @@ package example.manageuser.Entities;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.List;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "PositionDB")
 public class Position {
+
     @Id
     private long id;
 
+    @Field(value = "positionName")
     private String positionName;
-    private List<User> userList;
 
-    public Position(String positionName, List<User> userList) {
+    public Position() {}
+
+    public Position(long id, String positionName) {
+        this.id = id;
         this.positionName = positionName;
-        this.userList = userList;
     }
 
     public long getId() {return id;}
+
     public void setId(long id) {this.id = id;}
 
     public String getPositionName() {
@@ -29,11 +32,11 @@ public class Position {
         this.positionName = positionName;
     }
 
-    public List<User> getUserList() {
-        return userList;
-    }
-
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
+    @Override
+    public String toString() {
+        return "Position{" +
+                "id=" + id +
+                ", positionName='" + positionName + '\'' +
+                '}';
     }
 }
