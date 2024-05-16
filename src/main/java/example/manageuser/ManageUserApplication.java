@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 @SpringBootApplication
 public class ManageUserApplication {
@@ -20,7 +21,6 @@ public class ManageUserApplication {
         SpringApplication.run(ManageUserApplication.class, args);
         System.out.println("Hello World!");
     }
-
     @Bean
     public MongoTemplate mongoTemplate(MongoClient mongoClient, MongoMappingContext context) {
         MongoConverter converter = new MappingMongoConverter(new DefaultDbRefResolver(new SimpleMongoClientDatabaseFactory("mongodb+srv://duyvhtgcs190565:123456Aa@cluster0.wdfkxgs.mongodb.net/mydb")), context);
@@ -28,6 +28,4 @@ public class ManageUserApplication {
 
         return new MongoTemplate(new SimpleMongoClientDatabaseFactory("mongodb+srv://duyvhtgcs190565:123456Aa@cluster0.wdfkxgs.mongodb.net/mydb"), converter);
     }
-
-
 }

@@ -23,17 +23,30 @@ body {
     margin-right: 10px;
 }
 
+.icon-container2 {
+    font-size: 40px;
+    margin-right: 10px;
+}
+
 h2 {
     font-size: 24px;
 }
 
 form {
     display: grid;
-    grid-gap: 10px;
+    grid-gap: 20px;
 }
 
 label {
     font-weight: bold;
+}
+input{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+.submit-btn{
+    text-align: center;
 }
 
 input[type="text"],
@@ -41,7 +54,7 @@ input[type="date"] {
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 15px;
     box-sizing: border-box;
 }
 
@@ -77,15 +90,17 @@ input[type="submit"]:hover {
 
 .title-text-position{
     position: absolute;
-    top: 23%;
-    left: 46%;
-    transform: translate(-25%, 20%);
+    top: 3%;
+    left: 38.5%;
+    transform: translate(-28%, 31%);
     text-align: center;
+
 }
 
 .green-label {
     color: #cccccc;
 }
+
 .centered-form {
     max-width: 400px;
     margin: 0 auto;
@@ -101,13 +116,13 @@ input[type="submit"]:hover {
 /* Reset CSS */
 body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, table, th, td, form, fieldset, legend, input, textarea, button {
     margin: 0;
-    padding: 0;
+    padding: 40px;
     border: 0;
 }
 
 body {
     font-family: Arial, sans-serif;
-    color: #333; /* Màu chữ mặc định */
+    color: #333;
 }
 
 .w3-top {
@@ -121,13 +136,13 @@ body {
     background-color: rgba(0, 0, 0, 0.83);
     color: #1a1d9e;
     padding: 15px 0;
-    text-align: center; /* Canh giữa nội dung trong thanh nav */
+    text-align: center; /
 }
 
 .w3-bar-item {
     padding: 15px;
     text-decoration: none;
-    display: inline-block; /* Hiển thị các mục cạnh nhau */
+    display: inline-block;
 }
 
 .w3-hide-medium, .w3-hide-large {
@@ -192,6 +207,8 @@ h2#addPositionHeading {
     margin-top: 50px;
     color: #333333;
 }
+
+
 .centered-form {
     position: absolute;
     top: 50%;
@@ -208,6 +225,7 @@ img {
     height: fit-content;
     z-index: -1;
 }
+
 .cover {object-fit: cover;}
 
 .img-u {
@@ -215,6 +233,18 @@ img {
     width: 100%;
     height: 100%;
     image-rendering: pixelated;
+}
+
+.w3-right-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.w3-right-container .w3-bar-item {
+    margin-left: 10px;
 }
 
 

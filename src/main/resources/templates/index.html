@@ -48,11 +48,12 @@
 <div class="w3-top">
     <div class="w3-bar w3-black w3-card">
         <a class="w3-bar-item w3-button w3-padding-large w3-hide-medium w3-hide-large w3-right" href="javascript:void(0)" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
-        <a href="/templates/addUser.html" class="w3-bar-item w3-button w3-padding-large">Add</a>
-        <a href="/api/user/deleteAllUser" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Delete All Users</a>
-        <a href="/api/user/deleteByID//" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Delete ID</a>
-        <a href="/api/user/findUserNo//" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Show User No</a>
-        <a href="/api/user/showFullNameLike" class="w3-bar-item w3-button w3-padding-large w3-hide-small">Position of Users</a>
+        <a href="/templates/addUser.html" class="w3-bar-item w3-button w3-padding-large">AddUser</a>
+        <a href="/templates/addPosition.html" class="w3-bar-item w3-button w3-padding-large">AddPosition</a>
+        <div class="w3-right w3-padding-large">
+            <a href="/templates/register.html" class="w3-bar-item w3-button">Register</a>
+            <a href="/templates/login.html" class="w3-bar-item w3-button">Login</a>
+        </div>
         <a href="javascript:void(0)" class="w3-padding-large w3-hover-red w3-hide-small w3-right"><i class="fa fa-search"></i></a>
     </div>
 </div>
@@ -69,7 +70,6 @@
         </tr>
         </thead>
         <tbody>
-        <!-- Loop through user data and create table rows -->
         <c:forEach items="${users}" var="user">
             <tr>
                 <td>${user.userNo}</td>

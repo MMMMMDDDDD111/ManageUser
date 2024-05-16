@@ -1,8 +1,10 @@
 package example.manageuser.Controllers;
-import example.manageuser.Entities.Position;
-import example.manageuser.Entities.User;
+import example.manageuser.Model.Position;
+import example.manageuser.Model.RegisterRequest;
+import example.manageuser.Model.User;
 import example.manageuser.Repositories.PositionRepository;
 import example.manageuser.Repositories.UserRepository;
+import example.manageuser.Services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +12,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,13 +29,27 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final PositionRepository positionRepository;
+    private final UserService userService;
 
     @Autowired
     private UserRepository userrepository;
 
-    public UserController(UserRepository userRepository, PositionRepository positionRepository) {
+    public UserController(UserRepository userRepository, PositionRepository positionRepository, UserService userService) {
         this.userRepository = userRepository;
         this.positionRepository = positionRepository;
+        this.userService = userService;
+    }
+
+    @RequestMapping(value = "/index", method = RequestMethod.GET)
+    public ResponseEntity<User> showForm(@Validated @RequestBody User user) {
+        try {
+                logger.info("Save successfully: {}", user);
+            User savedUser = userrepository.save(user);
+            return ResponseEntity.ok(savedUser);
+        } catch (Exception e) {
+            logger.error("Save to be error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @PostMapping("/addUser")
@@ -39,8 +57,14 @@ public class UserController {
         try {
             logger.info("Received addUser request with user: {}", user);
 
+            //kiem tra userNO user ton tai trong csdl
+            User existingUser = userRepository.findByUserNo(user.getUserNo());
+            if (existingUser != null) {
+                logger.error("User with User No {} already exists", user.getUserNo());
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+            //kiem tra id position ton tai trong csdl
             Position position = user.getPosition();
-
             if (position != null && position.getId() != 0L) {
                 Optional<Position> existingPosition = positionRepository.findById(position.getId());
 
@@ -96,13 +120,15 @@ public class UserController {
         }
     }
 
-    @ResponseBody
+    @PutMapping("/update")
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+        User updateEmployee = userService.updateUser(user);
+        return new ResponseEntity<>(updateEmployee, HttpStatus.OK);
+    }
+
     @GetMapping("/showAllUsers")
-    public String showAllUsers() {
-
-        List<User> users = this.userrepository.findAll();
-
-        return users.toString();
+    public List<User> showAllUsers() {
+        return userRepository.findAll();
     }
 
     @GetMapping("/findUserNo/{userNo}")
@@ -127,13 +153,7 @@ public class UserController {
         logger.info("Received request to find users with full name like: {}", fullName);
 
         List<User> users = this.userrepository.findByFullNameLike("%" + fullName + "%");
-
-        StringBuilder html = new StringBuilder();
-        for (User usr : users) {
-            html.append(usr).append("<br>");
-        }
-
-        return html.toString();
+        return users.toString();
     }
 
     @ResponseBody

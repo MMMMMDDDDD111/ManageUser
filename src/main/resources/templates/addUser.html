@@ -6,7 +6,7 @@
     <title>Add User Form</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-..." crossorigin="anonymous">
-    <img class="img-u" src="/static/image_background.jpg" alt="Description of the image">
+    <img class="img-u" src="/static/image_background.jpg" alt="Background">
 
 </head>
 <body>
@@ -15,7 +15,7 @@
     <i class="fa-solid fa-user-plus" style="color: #cccccc"></i>
 </div>
 <div class="centered-form">
-    <form  action="/api/user/addUser" method="post">
+    <form  action="api/user/addUser" method="post">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
         <label for="userNo" class="green-label">User Number:</label><br>
         <input type="text" id="userNo" name="userNo"><br>
@@ -34,6 +34,9 @@
         window.history.back();
     });
 </script>
+
+<script src="JVS/functions.js"></script>
+<script src="JVS/Service.js"></script>
 
 </body>
 </html>

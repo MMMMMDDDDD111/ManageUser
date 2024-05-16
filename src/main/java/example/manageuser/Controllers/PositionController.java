@@ -1,6 +1,6 @@
 package example.manageuser.Controllers;
 
-import example.manageuser.Entities.Position;
+import example.manageuser.Model.Position;
 
 import example.manageuser.Repositories.PositionRepository;
 import org.slf4j.Logger;
@@ -29,6 +29,10 @@ public class PositionController {
         this.positionRepository = positionRepository;
     }
 
+    @GetMapping("/page")
+    public String index(){
+        return "addPosition";
+    }
 
     @PostMapping("/addPosition")
     public ResponseEntity<Position> addPosition(@Validated @RequestBody Position position) {
