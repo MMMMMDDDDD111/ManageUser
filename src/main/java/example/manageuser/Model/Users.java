@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Document(collection = "User")
@@ -20,9 +21,9 @@ import java.util.Set;
         public String email;
 
         @Field(value = "roles")
-        public Set<String> roles;
+        public Set<Role> roles = new HashSet<>();
 
-        public Users(String userName, String password, String email, Set<String> roles) {
+        public Users(String userName, String password, String email, Set<Role> roles) {
             this.userName = userName;
             this.password = password;
             this.email = email;
@@ -59,11 +60,11 @@ import java.util.Set;
         this.email = email;
     }
 
-    public Set<String> getRoles() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<String> roles) {
+    public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
 

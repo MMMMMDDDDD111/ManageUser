@@ -54,6 +54,7 @@ import java.util.Date;
                     '}';
         }
 
+
         public Long getId() {
             return id;
         }

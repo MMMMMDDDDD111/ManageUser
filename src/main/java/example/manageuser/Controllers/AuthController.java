@@ -1,16 +1,24 @@
 package example.manageuser.Controllers;
 
 import example.manageuser.Config.JWT.JwtUtil;
+import example.manageuser.DTO.ChangePasswordDTO;
 import example.manageuser.Model.*;
 import example.manageuser.Repositories.AuthRepository;
 import example.manageuser.Repositories.RoleRepository;
 import example.manageuser.Repositories.UsersRepo;
+import example.manageuser.Response.ResponseMessage;
 import example.manageuser.Services.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +34,9 @@ public class AuthController {
     private final UsersRepo UsersRepo;
 
     @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
     private AuthService authService;
 
     @Autowired
@@ -39,6 +50,10 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private PasswordEncoder encoder;
+
+
     public AuthController(AuthRepository AuthRepository, RoleRepository RoleRepository, UsersRepo UsersRepo) {
         this.AuthRepository = AuthRepository;
         this.RoleRepository = RoleRepository;
@@ -51,6 +66,24 @@ public class AuthController {
     public ResponseEntity<?> createUser(@RequestBody RegisterRequest registerRequest) {
         return authService.createUser(registerRequest);
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        org.springframework.security.core.userdetails.UserDetails userDetails =
+                (org.springframework.security.core.userdetails.UserDetails)
+                        SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("username").is(userDetails.getUsername()));
+
+        Update update = new Update();
+        update.set("password", passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+
+        mongoTemplate.updateFirst(query, update, Users.class);
+
+        return new ResponseEntity<>(new ResponseMessage("Password has been changed successfully"), HttpStatus.OK);
+    }
+
 }
 
 

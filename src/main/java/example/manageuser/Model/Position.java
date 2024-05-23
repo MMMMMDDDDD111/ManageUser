@@ -1,28 +1,37 @@
 package example.manageuser.Model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Document(collection = "PositionDB")
 public class Position {
 
     @Id
-    private long id;
+    private String id;
 
     @Field(value = "positionName")
     private String positionName;
 
+    @DBRef
+    private List<User> users = new ArrayList<>();
+
     public Position() {}
 
-    public Position(long id, String positionName) {
+    public Position(String id, List<User> users, String positionName) {
         this.id = id;
+        this.users = users;
         this.positionName = positionName;
     }
 
-    public long getId() {return id;}
+    public String getId() {return id;}
 
-    public void setId(long id) {this.id = id;}
+    public void setId(String id) {this.id = id;}
 
     public String getPositionName() {
         return positionName;
@@ -32,11 +41,20 @@ public class Position {
         this.positionName = positionName;
     }
 
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
+
     @Override
     public String toString() {
         return "Position{" +
                 "id=" + id +
                 ", positionName='" + positionName + '\'' +
+                ", users=" + users +
                 '}';
     }
 }

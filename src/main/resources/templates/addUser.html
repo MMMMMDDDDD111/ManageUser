@@ -15,7 +15,7 @@
     <i class="fa-solid fa-user-plus" style="color: #cccccc"></i>
 </div>
 <div class="centered-form">
-    <form  action="api/user/addUser" method="post">
+    <form id="addUserForm">
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
         <label for="userNo" class="green-label">User Number:</label><br>
         <input type="text" id="userNo" name="userNo"><br>
@@ -25,18 +25,10 @@
         <input type="date" id="hireDate" name="hireDate"><br>
         <label for="positionName" class="green-label">Position Name:</label><br>
         <input type="text" id="positionName" name="positionName"><br>
-        <input type="submit" value="Submit">
+        <input type="submit" id="Submit" value="Submit">
     </form>
 </div>
-
-<script>
-    document.getElementById("addUserHeading").addEventListener("click", function() {
-        window.history.back();
-    });
-</script>
-
-<script src="JVS/functions.js"></script>
-<script src="JVS/Service.js"></script>
-
+<!--<script src="JVS/app.js"></script>-->
+<script src="JVS/adduser.js"></script>
 </body>
 </html>

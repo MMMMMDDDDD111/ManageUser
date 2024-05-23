@@ -16,11 +16,12 @@ public class RegisterRequest {
     private String password;
     private String confirmPassword;
     @DBRef
-    private Set<String> roles = new HashSet<>();
+    private Set<String> roles;
 
     public RegisterRequest() {}
 
-    public RegisterRequest(String userName, String email, String address, String password, Set<String> roles, String confirmPassword) {
+    public RegisterRequest(String userName, String email, String address, String password,
+                           Set<String> roles, String confirmPassword) {
         this.userName = userName;
         this.email = email;
         this.address = address;

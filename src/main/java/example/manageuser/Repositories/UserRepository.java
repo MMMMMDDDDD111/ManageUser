@@ -17,5 +17,6 @@ public interface UserRepository extends MongoRepository<User, Long> {
     List<User> findByHireDateGreaterThan(Date hireDate);
 
     void deleteAll();
+    List<User> findAllById(Iterable<Long> ids);
 
 }

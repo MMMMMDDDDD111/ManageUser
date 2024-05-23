@@ -1,6 +1,7 @@
 package example.manageuser.Controllers;
 
 import example.manageuser.Config.JWT.JwtUtil;
+import example.manageuser.DTO.TokenDTO;
 import example.manageuser.Model.LoginRequest;
 import example.manageuser.Repositories.UsersRepo;
 import example.manageuser.Response.AuthenticationResponse;
@@ -33,11 +34,6 @@ public class LoginController {
     @Autowired
     private JwtUtil jwtUtil;
 
-//    @GetMapping("/login")
-//    public String login(Model model, CsrfToken token) {
-//        model.addAttribute("user");
-//        return "login";
-//    }
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
@@ -49,15 +45,37 @@ public class LoginController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             ResponseCookie jwtCookie = jwtUtil.generateJwtCookie(userDetails);
-
             String jwt = jwtUtil.generateToken(userDetails.getUsername());
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
 
-            // Trả về phản hồi với cookie JWT và JWT trong body
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                    .body(new AuthenticationResponse(jwt));
+                    .body(new AuthenticationResponse(jwt, refreshToken));
         } catch (Exception e) {
             return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody TokenDTO refreshTokenRequest) {
+        try {
+            String refreshToken = refreshTokenRequest.getRefreshToken();
+
+            if (jwtUtil.validateRefreshToken(refreshToken)) {
+                String username = jwtUtil.extractUsername(refreshToken);
+                UserDetails userDetails = authService.loadUserByUsername(username);
+
+                String newAccessToken = jwtUtil.generateToken(userDetails.getUsername());
+                ResponseCookie newJwtCookie = jwtUtil.generateJwtCookie(userDetails);
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.SET_COOKIE, newJwtCookie.toString())
+                        .body(new AuthenticationResponse(newAccessToken, refreshToken));
+            } else {
+                return new ResponseEntity<>("Invalid refresh token", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

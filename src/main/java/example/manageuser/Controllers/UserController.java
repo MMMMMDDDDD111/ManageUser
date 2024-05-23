@@ -1,13 +1,14 @@
 package example.manageuser.Controllers;
 import example.manageuser.Model.Position;
-import example.manageuser.Model.RegisterRequest;
 import example.manageuser.Model.User;
 import example.manageuser.Repositories.PositionRepository;
 import example.manageuser.Repositories.UserRepository;
+import example.manageuser.Response.ResponseMessage;
 import example.manageuser.Services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.Id;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,33 +53,46 @@ public class UserController {
         }
     }
 
+    @GetMapping("/addUser")
+    public String addUserForm(Model model) {
+        User user = new User();
+        Position position = new Position();
+        user.setPosition(position);
+        model.addAttribute("user", user);
+        return "addUser";
+    }
+
     @PostMapping("/addUser")
-    public ResponseEntity<User> addUser(@Validated @RequestBody User user) {
+    public ResponseEntity<?> addUser(@Validated @RequestBody User user) {
         try {
             logger.info("Received addUser request with user: {}", user);
 
-            //kiem tra userNO user ton tai trong csdl
+            // Kiểm tra xem userNO đã tồn tại trong cơ sở dữ liệu chưa
             User existingUser = userRepository.findByUserNo(user.getUserNo());
             if (existingUser != null) {
                 logger.error("User with User No {} already exists", user.getUserNo());
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
-            //kiem tra id position ton tai trong csdl
-            Position position = user.getPosition();
-            if (position != null && position.getId() != 0L) {
-                Optional<Position> existingPosition = positionRepository.findById(position.getId());
 
+            // Kiểm tra xem vị trí của người dùng có tồn tại không
+            Position position = user.getPosition();
+            if (position != null && !position.getPositionName().isEmpty()) {
+                Optional<Position> existingPosition = positionRepository.findByPositionName(position.getPositionName());
                 if (existingPosition.isPresent()) {
-                    position = existingPosition.get();
+                    user.setPosition(existingPosition.get());
                 } else {
-                    logger.error("Position with id {} not found", position.getId());
+                    logger.error("Position with name {} not found", position.getPositionName());
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 }
             }
             user.setPosition(position);
             User savedUser = userRepository.save(user);
+
+            String successMessage = "User created successfully with username: " + savedUser.getFullName();
+
             logger.info("User saved successfully: {}", savedUser);
-            return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+            // Trả về phản hồi với đối tượng DTO UserDTO
+            return new ResponseEntity<>(successMessage, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("Error occurred while adding user: {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -127,9 +141,16 @@ public class UserController {
     }
 
     @GetMapping("/showAllUsers")
-    public List<User> showAllUsers() {
-        return userRepository.findAll();
+    public ResponseEntity<List<User>> showAllUsers() {
+        try {
+            List<User> users = userRepository.findAll();
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error occurred while fetching users: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     @GetMapping("/findUserNo/{userNo}")
     public ResponseEntity<User> findUserByUserNo(@PathVariable("userNo") String userNo) {

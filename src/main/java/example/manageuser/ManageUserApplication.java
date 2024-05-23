@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
+
 @SpringBootApplication
 public class ManageUserApplication {
 

@@ -8,10 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.core.userdetails.UsernameNotFoundException;
-//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,65 +39,10 @@ public class AuthService implements UserDetailsService {
     @Lazy
     private PasswordEncoder encoder;
 
-
-//    public void registerUser(RegisterRequest signUpRequest) {
-//        logger.info("Registering user: {}", signUpRequest.getUserName());
-//
-//        if (authRepository.existsByUserName(signUpRequest.getUserName())) {
-//            logger.error("Error: Username {} is already taken!", signUpRequest.getUserName());
-//            throw new RuntimeException("Error: Username is already taken!");
-//        }
-//
-//        if (authRepository.existsByEmail(signUpRequest.getEmail())) {
-//            logger.error("Error: Email {} is already in use!", signUpRequest.getEmail());
-//            throw new RuntimeException("Error: Email is already in use!");
-//        }
-//
-////        Users user = new Users(signUpRequest.getUserName(),
-////                encoder.encode(signUpRequest.getPassword()),
-////                signUpRequest.getEmail());
-//
-//        Set<String> strRoles = signUpRequest.getRoles();
-//        Set<Role> roles = new HashSet<>();
-//
-//        if (strRoles == null) {
-//            Role userRole = roleRepository.findByName(ERole.Role_User)
-//                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//            roles.add(userRole);
-//            logger.info("Assigned default role USER to the user {}", signUpRequest.getUserName());
-//        } else {
-//            strRoles.forEach(role -> {
-//                switch (role) {
-//                    case "admin":
-//                        Role adminRole = roleRepository.findByName(ERole.Role_Admin)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(adminRole);
-//                        logger.info("Assigned role ADMIN to the user {}", signUpRequest.getUserName());
-//                        break;
-//
-//                    case "mod":
-//                        Role modRole = roleRepository.findByName(ERole.Role_Manager)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(modRole);
-//                        logger.info("Assigned role MANAGER to the user {}", signUpRequest.getUserName());
-//                        break;
-//
-//                    default:
-//                        Role userRole = roleRepository.findByName(ERole.Role_User)
-//                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-//                        roles.add(userRole);
-//                        logger.info("Assigned default role USER to the user {}", signUpRequest.getUserName());
-//                }
-//            });
-//        }
-//
-//        user.setRoles(roles);
-//        authRepository.save(user);
-//        logger.info("User {} registered successfully", signUpRequest.getUserName());
-//    }
-
     public ResponseEntity<?> createUser(RegisterRequest registerRequest) {
         try {
+
+
             if (usersRepo.existsByUserName(registerRequest.getUserName())) {
                 return new ResponseEntity<>("Username is already taken", HttpStatus.BAD_REQUEST);
             }
@@ -115,16 +56,16 @@ public class AuthService implements UserDetailsService {
             user.setPassword(encoder.encode(registerRequest.getPassword()));
             user.setEmail(registerRequest.getEmail());
 
-            Set<String> userRoles = new HashSet<>();
+            Set<Role> userRoles = new HashSet<>();
             for (String roleName : registerRequest.getRoles()) {
                 ERole eRole = ERole.valueOf(roleName.toUpperCase());
                 Role role = roleRepository.findByName(eRole)
                         .orElseThrow(() -> new RuntimeException("Error: Role " + eRole + " is not found."));
-                userRoles.add(role.getName().toString());
+                userRoles.add(role);
             }
+            user.setRoles(userRoles);
 
             usersRepo.save(user);
-            user.setRoles(userRoles);
             logger.info("User saved: {}", user);
 
             authRepository.save(registerRequest);
@@ -153,6 +94,5 @@ public class AuthService implements UserDetailsService {
     public boolean existsByEmail(String email) {
         return authRepository.existsByEmail(email);
     }
-
 }
 

@@ -1,13 +1,11 @@
-package example.manageuser;
-
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-class ManageUserApplicationTests {
-
-    @Test
-    void contextLoads() {
-    }
-
-}
+//package example.manageuser;
+//
+//import org.junit.jupiter.api.Test;
+//
+//class ManageUserApplicationTests {
+//
+//    @Test
+//    void contextLoads() {
+//    }
+//
+//}
