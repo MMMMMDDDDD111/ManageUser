@@ -74,10 +74,10 @@ public class AuthService implements UserDetailsService {
             UserResponse userResponse = new UserResponse(registerRequest.getUserName(), encoder.encode(registerRequest.getPassword()),registerRequest.getEmail());
 
             return new ResponseEntity<>(userResponse, HttpStatus.CREATED);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>("Error occurred while creating user", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return new ResponseEntity<>("Error occurred while creating user", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
     }
 
     public UserDetails loadUserByUsername(String username) {
@@ -94,5 +94,7 @@ public class AuthService implements UserDetailsService {
     public boolean existsByEmail(String email) {
         return authRepository.existsByEmail(email);
     }
+
+
 }
 

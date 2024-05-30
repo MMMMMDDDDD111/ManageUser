@@ -91,7 +91,7 @@ public class UserController {
             String successMessage = "User created successfully with username: " + savedUser.getFullName();
 
             logger.info("User saved successfully: {}", savedUser);
-            // Trả về phản hồi với đối tượng DTO UserDTO
+            // Trả về phản hồi với đối tượng successMessage
             return new ResponseEntity<>(successMessage, HttpStatus.CREATED);
         } catch (Exception e) {
             logger.error("Error occurred while adding user: {}", e.getMessage());

@@ -50,9 +50,6 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private PasswordEncoder encoder;
-
 
     public AuthController(AuthRepository AuthRepository, RoleRepository RoleRepository, UsersRepo UsersRepo) {
         this.AuthRepository = AuthRepository;

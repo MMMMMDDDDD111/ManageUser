@@ -7,10 +7,13 @@ import example.manageuser.Model.User;
 import example.manageuser.Repositories.PositionRepository;
 import example.manageuser.Repositories.UserRepository;
 import example.manageuser.Response.ResponseMessage;
+import example.manageuser.Services.AuthService;
+import example.manageuser.Services.PositionService;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -32,7 +35,7 @@ public class PositionController {
     private PositionRepository positionrepository;
 
     @Autowired
-    private UserRepository userrepository;
+    private PositionService positionService;
 
     private final PositionRepository positionRepository;
 
@@ -50,47 +53,31 @@ public class PositionController {
         try {
             logger.info("Retrieving all positions");
             List<Position> positions = positionrepository.findAll();
+            if (positions.isEmpty()) {
+                logger.warn("No positions found");
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
             logger.info("Found {} positions", positions.size());
-            return new ResponseEntity<>(positions, HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error("An error occurred while retrieving positions: {}", e.getMessage());
+            return ResponseEntity.ok(positions);
+        } catch (Exception  e) {
+            logger.error("An error occurred while retrieving positions", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
     @PostMapping("/addPosition")
     public ResponseEntity<?> addPosition(@Validated @RequestBody PositionDTO positionRequest) {
         try {
-            // Tạo một đối tượng Position mới và thiết lập tên
-            Position position = new Position();
-            position.setPositionName(positionRequest.getPositionName());
-
-            // Lấy danh sách User từ cơ sở dữ liệu
-            List<User> users = userrepository.findAllById(positionRequest.getUserIds());
-
-            // Kiểm tra xem tất cả các User có tồn tại không
-            if (users.size() != positionRequest.getUserIds().size()) {
+            Position position = positionService.createPosition(positionRequest);
+            List<User> assignedUsers = positionService.retrieveAssignedUsers(positionRequest.getUserIds());
+            if (assignedUsers.size() != positionRequest.getUserIds().size()) {
                 return new ResponseEntity<>(new ResponseMessage("Some users not found"), HttpStatus.BAD_REQUEST);
             }
-
-            Position savedPosition = positionRepository.save(position);
-
-            for (User user : users) {
-                user.setPosition(savedPosition);
-            }
-            userrepository.saveAll(users);
-
-            savedPosition.setUsers(users);
-            positionRepository.save(savedPosition);
-
-            return new ResponseEntity<>(savedPosition, HttpStatus.CREATED);
+            positionService.assignUsersToPosition(position, assignedUsers);
+            return new ResponseEntity<>(position, HttpStatus.CREATED);
         } catch (Exception e) {
-            logger.error("Error occurred while adding position: {}", e.getMessage());
             return new ResponseEntity<>(new ResponseMessage("An error occurred while adding the position"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @PutMapping("/updatePosition/{id}")
     public ResponseEntity<Position> updatePosition(@PathVariable("id") String id, @Validated @RequestBody Position newPosition) {
@@ -107,7 +94,6 @@ public class PositionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
     @ResponseBody
     @RequestMapping("/deleteAllPosition")
