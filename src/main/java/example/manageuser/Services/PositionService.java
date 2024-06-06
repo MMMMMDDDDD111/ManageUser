@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PositionService {
@@ -18,10 +19,14 @@ public class PositionService {
     @Autowired
     private PositionRepository positionRepository;
 
-    public Position createPosition(PositionDTO positionRequest) {
+    public Position createPosition(PositionDTO positionDTO) {
+        Optional<Position> existingPosition = positionRepository.findByPositionName(positionDTO.getPositionName());
+        if (existingPosition.isPresent()) {
+            throw new IllegalArgumentException("Position name already exists");
+        }
         Position position = new Position();
-        position.setPositionName(positionRequest.getPositionName());
-        return savePosition(position);
+        position.setPositionName(positionDTO.getPositionName());
+        return positionRepository.save(position);
     }
 
     public List<User> retrieveAssignedUsers(List<Long> userIds) {

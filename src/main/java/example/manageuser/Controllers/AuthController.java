@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -38,17 +39,6 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-
-    @Autowired
-    private AuthRepository authRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private UsersRepo usersRepo;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
 
     public AuthController(AuthRepository AuthRepository, RoleRepository RoleRepository, UsersRepo UsersRepo) {

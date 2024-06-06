@@ -24,6 +24,7 @@ import java.util.Optional;
 @Controller
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin(origins = "http://localhost:4200")
 public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(User.class);
@@ -53,14 +54,14 @@ public class UserController {
         }
     }
 
-    @GetMapping("/addUser")
-    public String addUserForm(Model model) {
-        User user = new User();
-        Position position = new Position();
-        user.setPosition(position);
-        model.addAttribute("user", user);
-        return "addUser";
-    }
+//    @GetMapping("/addUser")
+//    public String addUserForm(Model model) {
+//        User user = new User();
+//        Position position = new Position();
+//        user.setPosition(position);
+//        model.addAttribute("user", user);
+//        return "addUser";
+//    }
 
     @PostMapping("/addUser")
     public ResponseEntity<?> addUser(@Validated @RequestBody User user) {
@@ -75,17 +76,15 @@ public class UserController {
             }
 
             // Kiểm tra xem vị trí của người dùng có tồn tại không
-            Position position = user.getPosition();
-            if (position != null && !position.getPositionName().isEmpty()) {
-                Optional<Position> existingPosition = positionRepository.findByPositionName(position.getPositionName());
+            if (user.getPosition() != null && !user.getPosition().getPositionName().isEmpty()) {
+                Optional<Position> existingPosition = positionRepository.findByPositionName(user.getPosition().getPositionName());
                 if (existingPosition.isPresent()) {
                     user.setPosition(existingPosition.get());
                 } else {
-                    logger.error("Position with name {} not found", position.getPositionName());
+                    logger.error("Position with name {} not found", user.getPosition().getPositionName());
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 }
             }
-            user.setPosition(position);
             User savedUser = userRepository.save(user);
 
             String successMessage = "User created successfully with username: " + savedUser.getFullName();
@@ -109,12 +108,15 @@ public class UserController {
                 logger.error("User with id {} not found", id);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
             User existingUser = userOptional.get();
             existingUser.setFullName(user.getFullName());
+
             Date hireDate = user.getHireDate();
             if (hireDate != null) {
                 existingUser.setHireDate(hireDate);
             }
+
             Position userPosition = user.getPosition();
             if (userPosition != null) {
                 Optional<Position> existingPosition = positionRepository.findByIdOrPositionName(userPosition.getId(), userPosition.getPositionName());
@@ -125,6 +127,7 @@ public class UserController {
                     return new ResponseEntity<>(HttpStatus.NOT_FOUND);
                 }
             }
+
             User updatedUser = userRepository.save(existingUser);
             logger.info("User updated successfully: {}", updatedUser);
             return new ResponseEntity<>(updatedUser, HttpStatus.OK);
@@ -144,13 +147,13 @@ public class UserController {
     public ResponseEntity<List<User>> showAllUsers() {
         try {
             List<User> users = userRepository.findAll();
+            logger.info("Found {} users", users.size());
             return new ResponseEntity<>(users, HttpStatus.OK);
         } catch (Exception e) {
             logger.error("Error occurred while fetching users: {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
 
     @GetMapping("/findUserNo/{userNo}")
     public ResponseEntity<User> findUserByUserNo(@PathVariable("userNo") String userNo) {

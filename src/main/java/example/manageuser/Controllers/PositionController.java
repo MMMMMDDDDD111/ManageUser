@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ import java.util.stream.StreamSupport;
 @Controller
 @RestController
 @RequestMapping("/api/position")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PositionController {
     private static final Logger logger = LoggerFactory.getLogger(Position.class);
 
@@ -43,12 +45,8 @@ public class PositionController {
         this.positionRepository = positionRepository;
     }
 
-    @GetMapping("/page")
-    public String index(){
-        return "addPosition";
-    }
-
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<Position>> getAllPositions() {
         try {
             logger.info("Retrieving all positions");
@@ -64,6 +62,7 @@ public class PositionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @PostMapping("/addPosition")
     public ResponseEntity<?> addPosition(@Validated @RequestBody PositionDTO positionRequest) {
         try {
@@ -74,10 +73,13 @@ public class PositionController {
             }
             positionService.assignUsersToPosition(position, assignedUsers);
             return new ResponseEntity<>(position, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(new ResponseMessage(e.getMessage()), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(new ResponseMessage("An error occurred while adding the position"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @PutMapping("/updatePosition/{id}")
     public ResponseEntity<Position> updatePosition(@PathVariable("id") String id, @Validated @RequestBody Position newPosition) {

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -80,21 +81,26 @@ public class AuthService implements UserDetailsService {
             }
     }
 
-    public UserDetails loadUserByUsername(String username) {
+
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Users user = usersRepo.findByUserName(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
 
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            authorities.add(new SimpleGrantedAuthority(role.getName().name()));
+        }
+
         return new org.springframework.security.core.userdetails.User(
-                user.getUserName(), user.getPassword(), new ArrayList<>()
+                user.getUserName(), user.getPassword(), authorities
         );
     }
 
     public boolean existsByEmail(String email) {
         return authRepository.existsByEmail(email);
     }
-
 
 }
 

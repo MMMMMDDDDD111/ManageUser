@@ -15,7 +15,6 @@ public class RegisterRequest {
     private String address;
     private String password;
     private String confirmPassword;
-    @DBRef
     private Set<String> roles;
 
     public RegisterRequest() {}

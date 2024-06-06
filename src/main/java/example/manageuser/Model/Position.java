@@ -1,5 +1,7 @@
 package example.manageuser.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,7 +21,8 @@ public class Position {
     private String positionName;
 
     @DBRef
-    private List<User> users = new ArrayList<>();
+    @JsonIgnore
+    private List<User> users;
 
     public Position() {}
 

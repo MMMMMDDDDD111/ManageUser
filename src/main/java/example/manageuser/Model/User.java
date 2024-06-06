@@ -1,5 +1,7 @@
 package example.manageuser.Model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
@@ -13,7 +15,6 @@ import java.util.Date;
 
     @Document(collection = "MYDB")
     public class User implements Serializable {
-        private static final Logger logger = LoggerFactory.getLogger(User.class);
 
         @Id
         private Long id;
@@ -26,6 +27,7 @@ import java.util.Date;
         private String fullName;
 
         @Field(value = "Hire_Date")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         private Date hireDate;
 
         @DBRef
@@ -40,21 +42,8 @@ import java.util.Date;
             this.fullName = fullName;
             this.hireDate = hireDate;
             this.position = position;
-            logger.info("User created with User No: {}, Full Name: {}, Hire Date: {}", userNo, fullName, hireDate);
         }
-
-        @Override
-        public String toString() {
-            return "User{" +
-                    "id=" + id +
-                    ", userNo='" + userNo + '\'' +
-                    ", fullName='" + fullName + '\'' +
-                    ", hireDate=" + hireDate +
-                    ", position=" + position +
-                    '}';
-        }
-
-
+        
         public Long getId() {
             return id;
         }
